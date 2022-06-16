@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 
 	"github.com/MiftahSalam/jabar-digital-service-test/users/model"
 	"github.com/MiftahSalam/jabar-digital-service-test/users/serializer"
@@ -55,60 +56,63 @@ var MockRegisterTest = []MockTests{
 			a.Equal(6, len(jsonResp.User.Password))
 		},
 	},
-	// {
-	// 	"error unauthorized (no user loged in): ArticleCreate Test",
-	// 	func(c *gin.Context) {
-	// 	},
-	// 	map[string]map[string]interface{}{"article": {
-	// 		"title":       ArticlesMock[1].Title,
-	// 		"description": ArticlesMock[1].Description,
-	// 		"body":        ArticlesMock[1].Body,
-	// 		"tagList":     ArticleModels.TagsMock,
-	// 	}},
-	// 	http.StatusUnauthorized,
-	// 	func(c *gin.Context, w *httptest.ResponseRecorder, a *assert.Assertions) {
-	// 		response_body, _ := ioutil.ReadAll(w.Body)
-	// 		common.LogI.Println("response_body", string(response_body))
-	// 		a.Equal(`{"errors":{"access":"user not login"}}`, string(response_body))
+	{
+		"error bad request (no username data body): Register Test",
+		func(c *gin.Context) {
+		},
+		map[string]interface{}{
+			"role": model.UsersMock[0].UserRole.Name,
+		},
+		http.StatusBadRequest,
+		func(c *gin.Context, w *httptest.ResponseRecorder, a *assert.Assertions) {
+			response_body, _ := ioutil.ReadAll(w.Body)
+			fmt.Println("response_body", string(response_body))
+			a.Contains(string(response_body), "errors")
+			a.Equal(1, strings.Count(string(response_body), "key: required"))
+		},
+	},
+	{
+		"error bad request (no role data body): Register Test",
+		func(c *gin.Context) {
+		},
+		map[string]interface{}{
+			"username": model.UsersMock[0].Username,
+		},
+		http.StatusBadRequest,
+		func(c *gin.Context, w *httptest.ResponseRecorder, a *assert.Assertions) {
+			response_body, _ := ioutil.ReadAll(w.Body)
+			fmt.Println("response_body", string(response_body))
+			a.Contains(string(response_body), "errors")
+			a.Equal(1, strings.Count(string(response_body), "key: required"))
+		},
+	},
+	{
+		"error bad request (no data body): Register Test",
+		func(c *gin.Context) {
+		},
+		map[string]interface{}{},
+		http.StatusBadRequest,
+		func(c *gin.Context, w *httptest.ResponseRecorder, a *assert.Assertions) {
+			response_body, _ := ioutil.ReadAll(w.Body)
+			fmt.Println("response_body", string(response_body))
+			a.Contains(string(response_body), "errors")
+			a.Equal(2, strings.Count(string(response_body), "key: required"))
+		},
+	},
+	{
+		"error (user already exist): Register Test",
+		func(c *gin.Context) {
+		},
+		map[string]interface{}{
+			"username": model.UsersMock[0].Username,
+			"role":     model.UsersMock[0].UserRole.Name,
+		},
+		http.StatusUnprocessableEntity,
+		func(c *gin.Context, w *httptest.ResponseRecorder, a *assert.Assertions) {
+			response_body, _ := ioutil.ReadAll(w.Body)
 
-	// 	},
-	// },
-	// {
-	// 	"error bad request (no data body): ArticleCreate Test",
-	// 	func(c *gin.Context) {
-	// 		c.Set("user", ArticleModels.ArticleUsersModelMock[0].UserModel)
-	// 	},
-	// 	map[string]map[string]interface{}{},
-	// 	http.StatusBadRequest,
-	// 	func(c *gin.Context, w *httptest.ResponseRecorder, a *assert.Assertions) {
-	// 		response_body, _ := ioutil.ReadAll(w.Body)
-	// 		common.LogI.Println("response_body", string(response_body))
-	// 		// a.Equal(`{"errors":{"access":"user not login"}}`, string(response_body))
-	// 	},
-	// },
-	// {
-	// 	"no error althought some data body fields not provided: ArticleCreate Test",
-	// 	func(c *gin.Context) {
-	// 		c.Set("user", ArticleModels.ArticleUsersModelMock[0].UserModel)
-	// 	},
-	// 	map[string]map[string]interface{}{"article": {
-	// 		"title": ArticlesMock[1].Title,
-	// 		"body":  ArticlesMock[1].Body,
-	// 	}},
-	// 	http.StatusCreated,
-	// 	func(c *gin.Context, w *httptest.ResponseRecorder, a *assert.Assertions) {
-	// 		response_body, _ := ioutil.ReadAll(w.Body)
-	// 		// common.LogI.Println("response_body", string(response_body))
-	// 		var jsonResp ArticleResponse
-	// 		err := json.Unmarshal(response_body, &jsonResp)
-	// 		if err != nil {
-	// 			common.LogE.Println("Cannot umarshal json content with error: ", err)
-	// 		}
-	// 		a.NoError(err)
-	// 		// common.LogI.Println("jsonResp", jsonResp)
-	// 		a.Equal(ArticlesMock[1].Title, jsonResp.Article.Title)
-	// 		a.Equal(ArticlesMock[1].Body, jsonResp.Article.Body)
-	// 		a.Equal(ArticleModels.ArticleUsersModelMock[0].UserModel.Username, jsonResp.Article.Author.Username)
-	// 	},
-	// },
+			fmt.Println("response_body", string(response_body))
+			a.Equal(`{"errors":{"database":"user already exist"}}`, string(response_body))
+		},
+	},
 }
