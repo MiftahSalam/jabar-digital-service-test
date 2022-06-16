@@ -10,7 +10,7 @@ import (
 
 type Role struct {
 	Id   uint   `gorm:"primaryKey"`
-	Name string `gorm:"column:name;not null"`
+	Name string `gorm:"column:name;not null;unique"`
 }
 
 type User struct {
@@ -34,6 +34,17 @@ func Migrate() {
 	database.Db.Connection.AutoMigrate(&User{})
 }
 
+func FindOneUser(condition interface{}, args ...interface{}) (User, error) {
+	var user User
+	err := database.Db.Connection.Preload("UserRole").Where(condition, args...).First(&user).Error
+
+	return user, err
+}
+
+func SaveOne(data interface{}) error {
+	return database.Db.Connection.Save(data).Error
+}
+
 func (user *User) SetPasswordHash(password string) error {
 	if len(password) == 0 {
 		return errors.New("password should not be empty")
@@ -44,4 +55,11 @@ func (user *User) SetPasswordHash(password string) error {
 	user.PasswordHash = string(password_hash)
 
 	return nil
+}
+
+func (user *User) CheckPassWord(password string) error {
+	byte_password := []byte(password)
+	byte_password_hash := []byte(user.PasswordHash)
+
+	return bcrypt.CompareHashAndPassword(byte_password_hash, byte_password)
 }
