@@ -107,3 +107,16 @@ func InitDatabase() error {
 
 	return nil
 }
+
+func CloseDatabase() {
+	if Db.Connection != nil {
+		sqlDB, err := Db.Connection.DB()
+		if err != nil {
+			fmt.Println("Cannot get database instance")
+		} else {
+			sqlDB.Close()
+		}
+	} else {
+		fmt.Println("Cannot get database connection")
+	}
+}

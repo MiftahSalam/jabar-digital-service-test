@@ -19,16 +19,7 @@ func TestMain(m *testing.M) {
 
 	exitCode := m.Run()
 
-	if Db.Connection != nil {
-		sqlDB, err := Db.Connection.DB()
-		if err != nil {
-			fmt.Println("Cannot get database instance")
-		} else {
-			sqlDB.Close()
-		}
-	} else {
-		fmt.Println("Cannot get database connection")
-	}
+	CloseDatabase()
 	os.Exit(exitCode)
 
 	fmt.Println("Test Database Commons package end")
