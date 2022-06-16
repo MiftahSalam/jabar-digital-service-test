@@ -31,8 +31,14 @@ type LoggedInUserResponse struct {
 		serializer.UserLoggedInResponse
 	} `json:"user"`
 }
+type ValidateTokenResponse struct {
+	User struct {
+		serializer.AuthDtoResponse
+	} `json:"validate"`
+}
 
 var LoggedInPassword string
+var LoggedInToken string
 var MockRegisterTest = []MockTests{
 	{
 		"no error: Register Test",
@@ -147,6 +153,7 @@ var MockLoginTest = []MockTests{
 
 			a.Equal(model.UsersMock[0].Username, jsonResp.User.Username)
 			a.NotEmpty(jsonResp.User.Token, "token should not empty string")
+			LoggedInToken = jsonResp.User.Token
 		},
 	},
 	{
@@ -220,6 +227,64 @@ var MockLoginTest = []MockTests{
 			response_body, _ := ioutil.ReadAll(w.Body)
 			fmt.Println("response_body", string(response_body))
 			a.Equal(`{"errors":{"login":"invalid password"}}`, string(response_body))
+		},
+	},
+}
+
+var MockAuthTest = []MockTests{
+	{
+		"no error: Auth Test",
+		func(c *gin.Context) {
+			c.Params = append(c.Params, gin.Param{Key: "token", Value: LoggedInToken})
+		},
+		map[string]interface{}{},
+		http.StatusOK,
+		func(c *gin.Context, w *httptest.ResponseRecorder, a *assert.Assertions) {
+			response_body, _ := ioutil.ReadAll(w.Body)
+
+			// fmt.Println("response_body", string(response_body))
+
+			var jsonResp ValidateTokenResponse
+			err := json.Unmarshal(response_body, &jsonResp)
+			if err != nil {
+				fmt.Println("Cannot umarshal json content with error: ", err)
+			}
+			a.NoError(err)
+
+			// fmt.Println("jsonResp", jsonResp)
+
+			a.Equal(model.UsersMock[0].Username, jsonResp.User.Username)
+			a.True(jsonResp.User.Is_valid)
+		},
+	},
+	{
+		"error not authorized (signature invalid): Auth Test",
+		func(c *gin.Context) {
+			buf_LoggedInToken := LoggedInToken[:len(LoggedInToken)-1]
+			c.Params = append(c.Params, gin.Param{Key: "token", Value: buf_LoggedInToken})
+		},
+		map[string]interface{}{},
+		http.StatusUnauthorized,
+		func(c *gin.Context, w *httptest.ResponseRecorder, a *assert.Assertions) {
+			response_body, _ := ioutil.ReadAll(w.Body)
+
+			// fmt.Println("response_body", string(response_body))
+
+			a.Equal(`{"errors":{"auth":"signature is invalid"}}`, string(response_body))
+		},
+	},
+	{
+		"error not authorized (invalid token): Auth Test",
+		func(c *gin.Context) {
+		},
+		map[string]interface{}{},
+		http.StatusUnauthorized,
+		func(c *gin.Context, w *httptest.ResponseRecorder, a *assert.Assertions) {
+			response_body, _ := ioutil.ReadAll(w.Body)
+
+			fmt.Println("response_body", string(response_body))
+
+			a.Equal(`{"errors":{"auth":"token contains an invalid number of segments"}}`, string(response_body))
 		},
 	},
 }

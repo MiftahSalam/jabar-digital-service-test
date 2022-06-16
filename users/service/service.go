@@ -2,8 +2,12 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 
 	"github.com/MiftahSalam/jabar-digital-service-test/commons"
@@ -65,4 +69,32 @@ func Login(ctx *gin.Context) {
 		}
 		ctx.JSON(http.StatusOK, gin.H{"user": userSerializer.Response()})
 	}
+}
+
+func Auth(ctx *gin.Context) {
+	token_string := ctx.Param("token")
+
+	// fmt.Println("token_string", token_string)
+
+	claims := &jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(token_string, claims, func(t *jwt.Token) (interface{}, error) {
+		secret := []byte(os.Getenv("JWT_SECRET"))
+		return secret, nil
+	})
+	if err != nil {
+		fmt.Println("err", err)
+		ctx.JSON(http.StatusUnauthorized, commons.NewError("auth", err))
+		return
+	}
+
+	token_claim := *claims
+	// fmt.Println("token_claim", token_claim)
+
+	auth_response := serializer.AuthDtoResponse{
+		Is_valid: token.Valid,
+		Expired:  time.UnixMilli(int64(token_claim["exp"].(float64))).String(),
+		Username: token_claim["username"].(string),
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"validate": auth_response})
 }

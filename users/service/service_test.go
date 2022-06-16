@@ -112,3 +112,22 @@ func TestLogin(t *testing.T) {
 		})
 	}
 }
+
+func TestAuth(t *testing.T) {
+	asserts := assert.New(t)
+
+	for _, test := range MockAuthTest {
+		t.Run(test.TestName, func(t *testing.T) {
+			c, w := InitTest()
+			test.Init(c)
+
+			MockJSONPost(c, test.Data)
+
+			Auth(c)
+
+			asserts.Equal(test.ResponseCode, w.Code)
+
+			test.ResponseTest(c, w, asserts)
+		})
+	}
+}
