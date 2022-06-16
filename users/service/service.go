@@ -41,3 +41,28 @@ func Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusCreated, gin.H{"user": userSerializer.Response()})
 	}
 }
+
+func Login(ctx *gin.Context) {
+	user := dtos.UserLoginDto{}
+	if err := user.Bind(ctx); err != nil {
+		ctx.JSON(http.StatusBadRequest, commons.NewValidationError(err))
+		return
+	}
+
+	found_user, _ := model.FindOneUser(&model.User{Username: user.Username})
+	if found_user.Username == "" {
+		ctx.JSON(http.StatusNotFound, commons.NewError("database", errors.New("user not found")))
+		return
+	} else {
+		if found_user.CheckPassWord(user.Password) != nil {
+			ctx.JSON(http.StatusForbidden, commons.NewError("login", errors.New("invalid password")))
+			return
+		}
+
+		userSerializer := serializer.UserLoggedInSerializer{
+			Ctx:  ctx,
+			User: &found_user,
+		}
+		ctx.JSON(http.StatusOK, gin.H{"user": userSerializer.Response()})
+	}
+}

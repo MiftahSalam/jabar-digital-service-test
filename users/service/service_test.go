@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	db "github.com/MiftahSalam/jabar-digital-service-test/commons/database"
@@ -62,7 +63,7 @@ func MockJSONPost(c *gin.Context, content interface{}) {
 	if err != nil {
 		fmt.Println("Cannot marshal json content")
 	}
-	fmt.Println("MockJSONPost req content", string(jsonbyte))
+	// fmt.Println("MockJSONPost req content", string(jsonbyte))
 
 	c.Request.Body = io.NopCloser(bytes.NewBuffer(jsonbyte))
 }
@@ -83,15 +84,31 @@ func TestRegister(t *testing.T) {
 			test.ResponseTest(c, w, asserts)
 		})
 	}
+}
 
-	// user, _ := c.Get("user")
-	// common.LogI.Println("key user before", user)
-	// for k := range c.Keys {
-	// 	if k == "user" {
-	// 		delete(c.Keys, k)
-	// 		common.LogI.Println("ckeys", k)
-	// 	}
-	// }
-	// user, _ = c.Get("user")
-	// common.LogI.Println("key user after", user)
+func TestLogin(t *testing.T) {
+	asserts := assert.New(t)
+
+	for _, test := range MockLoginTest {
+		t.Run(test.TestName, func(t *testing.T) {
+			c, w := InitTest()
+			test.Init(c)
+
+			if strings.Contains(test.TestName, "no error") {
+				data := map[string]interface{}{
+					"username": model.UsersMock[0].Username,
+					"password": LoggedInPassword,
+				}
+				MockJSONPost(c, data)
+			} else {
+				MockJSONPost(c, test.Data)
+			}
+
+			Login(c)
+
+			asserts.Equal(test.ResponseCode, w.Code)
+
+			test.ResponseTest(c, w, asserts)
+		})
+	}
 }
