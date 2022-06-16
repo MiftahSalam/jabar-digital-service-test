@@ -2,9 +2,11 @@ package commons
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,4 +50,20 @@ func TestRandString(t *testing.T) {
 	asserts.Equal(len(str), 10, "length should be 10")
 	asserts.NotEqual(str, str1, "string should not equal")
 	// fmt.Println("str1", str1)
+}
+
+func TestGenToken(t *testing.T) {
+	asserts := assert.New(t)
+
+	err := godotenv.Load("../.env")
+	if err != nil {
+		panic("Cannot load environment file")
+	}
+
+	token := GenerateToken(3, "miftah")
+
+	fmt.Println("token", token)
+
+	asserts.IsType(token, string("token"), "token type should be string")
+	asserts.NotEmpty(token, "token should not empty string")
 }
