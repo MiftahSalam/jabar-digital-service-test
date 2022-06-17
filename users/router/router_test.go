@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/MiftahSalam/jabar-digital-service-test/commons/database"
@@ -81,130 +82,41 @@ func TestRegister(t *testing.T) {
 	}
 }
 
-// func TestListArticle(t *testing.T) {
-// 	asserts := assert.New(t)
+func TestLogin(t *testing.T) {
+	asserts := assert.New(t)
 
-// 	for _, test := range MockListArticle {
-// 		t.Run(test.UserMockTest.TestName, func(t *testing.T) {
-// 			w := createTest(asserts, &test)
+	for _, test := range MockLogin {
+		t.Run(test.TestName, func(t *testing.T) {
+			if strings.Contains(test.TestName, "no error") {
+				test.Body = fmt.Sprintf(`{"username":"%v","password":"%v"}`,
+					model.UsersMock[0].Username,
+					registeredPassword,
+				)
+			}
+			w := createTest(asserts, &test)
 
-// 			asserts.Equal(test.UserMockTest.ResponseCode, w.Code)
+			asserts.Equal(test.ResponseCode, w.Code)
 
-// 			test.ResponseTest(w, asserts)
-// 		})
-// 	}
-// }
+			test.ResponseTest(w, asserts)
+		})
+	}
+}
 
-// func TestUpdateArticle(t *testing.T) {
-// 	asserts := assert.New(t)
+func TestValidate(t *testing.T) {
+	asserts := assert.New(t)
 
-// 	for _, test := range MockUpdateArticle {
-// 		t.Run(test.UserMockTest.TestName, func(t *testing.T) {
-// 			w := createTest(asserts, &test)
+	for _, test := range MockValidate {
+		t.Run(test.TestName, func(t *testing.T) {
+			if strings.Contains(test.TestName, "no error") {
+				test.Url = fmt.Sprintf("/auth/%v", LoggedInToken)
+			} else if strings.Contains(test.TestName, "error not authorized (signature invalid)") {
+				test.Url = fmt.Sprintf("/auth/%v", LoggedInToken[:len(LoggedInToken)-1])
+			}
+			w := createTest(asserts, &test)
 
-// 			asserts.Equal(test.UserMockTest.ResponseCode, w.Code)
+			asserts.Equal(test.ResponseCode, w.Code)
 
-// 			test.ResponseTest(w, asserts)
-// 		})
-// 	}
-// }
-
-// func TestFavoriteArticle(t *testing.T) {
-// 	asserts := assert.New(t)
-
-// 	for _, test := range MockFavoriteArticle {
-// 		t.Run(test.UserMockTest.TestName, func(t *testing.T) {
-// 			w := createTest(asserts, &test)
-
-// 			asserts.Equal(test.UserMockTest.ResponseCode, w.Code)
-
-// 			test.ResponseTest(w, asserts)
-// 		})
-// 	}
-// }
-
-// func TestUnFavoriteArticle(t *testing.T) {
-// 	asserts := assert.New(t)
-
-// 	for _, test := range MockUnFavoriteArticle {
-// 		t.Run(test.UserMockTest.TestName, func(t *testing.T) {
-// 			w := createTest(asserts, &test)
-
-// 			asserts.Equal(test.UserMockTest.ResponseCode, w.Code)
-
-// 			test.ResponseTest(w, asserts)
-// 		})
-// 	}
-// }
-
-// func TestCommentCreateArticle(t *testing.T) {
-// 	asserts := assert.New(t)
-
-// 	for _, test := range MockCreateCommentArticle {
-// 		t.Run(test.UserMockTest.TestName, func(t *testing.T) {
-// 			w := createTest(asserts, &test)
-
-// 			asserts.Equal(test.UserMockTest.ResponseCode, w.Code)
-
-// 			test.ResponseTest(w, asserts)
-// 		})
-// 	}
-// }
-
-// func TestCommentListArticle(t *testing.T) {
-// 	asserts := assert.New(t)
-
-// 	for _, test := range MockCommentListArticle {
-// 		t.Run(test.UserMockTest.TestName, func(t *testing.T) {
-// 			w := createTest(asserts, &test)
-
-// 			asserts.Equal(test.UserMockTest.ResponseCode, w.Code)
-
-// 			test.ResponseTest(w, asserts)
-// 		})
-// 	}
-// }
-
-// func TestDeleteArticle(t *testing.T) {
-// 	asserts := assert.New(t)
-
-// 	for _, test := range MockDeleteArticle {
-// 		t.Run(test.UserMockTest.TestName, func(t *testing.T) {
-// 			w := createTest(asserts, &test)
-
-// 			asserts.Equal(test.UserMockTest.ResponseCode, w.Code)
-
-// 			test.ResponseTest(w, asserts)
-// 		})
-// 	}
-// }
-
-// //hard to test (need to know comment id first)
-// func TestDeleteCommentrticle(t *testing.T) {
-// 	t.Skip()
-// 	asserts := assert.New(t)
-
-// 	for _, test := range MockDeleteCommentArticle {
-// 		t.Run(test.UserMockTest.TestName, func(t *testing.T) {
-// 			w := createTest(asserts, &test)
-
-// 			asserts.Equal(test.UserMockTest.ResponseCode, w.Code)
-
-// 			test.ResponseTest(w, asserts)
-// 		})
-// 	}
-// }
-
-// func TestTagList(t *testing.T) {
-// 	asserts := assert.New(t)
-
-// 	for _, test := range MockGetTagList {
-// 		t.Run(test.UserMockTest.TestName, func(t *testing.T) {
-// 			w := createTest(asserts, &test)
-
-// 			asserts.Equal(test.UserMockTest.ResponseCode, w.Code)
-
-// 			test.ResponseTest(w, asserts)
-// 		})
-// 	}
-// }
+			test.ResponseTest(w, asserts)
+		})
+	}
+}
