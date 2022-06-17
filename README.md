@@ -102,4 +102,4 @@ Contoh menjalankan test:
 Untuk deploy aplikasi Go di heroku dapat dilihat di link berikut https://devcenter.heroku.com/articles/getting-started-with-go
 
 ## API Spec
-API Spec can be found in docs folder https://github.com/MiftahSalam/jabar-digital-service-test/docs/api_spec.md
+API Spec can be found in docs folder
