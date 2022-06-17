@@ -113,6 +113,22 @@ var MockRegisterTest = []MockTests{
 		},
 	},
 	{
+		"error (role does not exist): Register Test",
+		func(c *gin.Context) {
+		},
+		map[string]interface{}{
+			"username": model.UsersMock[0].Username,
+			"role":     "MyRole",
+		},
+		http.StatusBadRequest,
+		func(c *gin.Context, w *httptest.ResponseRecorder, a *assert.Assertions) {
+			response_body, _ := ioutil.ReadAll(w.Body)
+
+			// fmt.Println("response_body", string(response_body))
+			a.Equal(`{"errors":{"Role":"invalid role"}}`, string(response_body))
+		},
+	},
+	{
 		"error (user already exist): Register Test",
 		func(c *gin.Context) {
 		},
