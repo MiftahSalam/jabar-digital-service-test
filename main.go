@@ -7,6 +7,7 @@ import (
 	"github.com/MiftahSalam/jabar-digital-service-test/commons/database"
 	"github.com/MiftahSalam/jabar-digital-service-test/users/model"
 	userRouter "github.com/MiftahSalam/jabar-digital-service-test/users/router"
+	"github.com/MiftahSalam/jabar-digital-service-test/users/validator"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -27,6 +28,7 @@ func main() {
 		panic("Error while initialize database")
 	}
 
+	validator.Init()
 	model.Migrate() //migrate user models
 
 	router := gin.Default()
