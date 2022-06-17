@@ -41,7 +41,11 @@ func NewValidationError(err error) CommonError {
 		if v.Param() != "" {
 			new_error.Errors[v.Field()] = fmt.Sprintf("{%v: %v}", v.Tag(), v.Param())
 		} else {
-			new_error.Errors[v.Field()] = fmt.Sprintf("{key: %v}", v.Tag())
+			if v.Tag() == "role" {
+				new_error.Errors[v.Field()] = fmt.Sprintf("invalid role")
+			} else {
+				new_error.Errors[v.Field()] = fmt.Sprintf("{key: %v}", v.Tag())
+			}
 		}
 	}
 
