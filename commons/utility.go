@@ -36,17 +36,20 @@ func NewValidationError(err error) CommonError {
 		return new_error
 	}
 
-	errs := err.(validator.ValidationErrors)
-	for _, v := range errs {
-		if v.Param() != "" {
-			new_error.Errors[v.Field()] = fmt.Sprintf("{%v: %v}", v.Tag(), v.Param())
-		} else {
-			if v.Tag() == "role" {
-				new_error.Errors[v.Field()] = fmt.Sprintf("invalid role")
+	if errs, ok := err.(validator.ValidationErrors); ok {
+		for _, v := range errs {
+			if v.Param() != "" {
+				new_error.Errors[v.Field()] = fmt.Sprintf("{%v: %v}", v.Tag(), v.Param())
 			} else {
-				new_error.Errors[v.Field()] = fmt.Sprintf("{key: %v}", v.Tag())
+				if v.Tag() == "role" {
+					new_error.Errors[v.Field()] = "invalid role"
+				} else {
+					new_error.Errors[v.Field()] = fmt.Sprintf("{key: %v}", v.Tag())
+				}
 			}
 		}
+	} else {
+		new_error.Errors["Unknown"] = err.Error()
 	}
 
 	return new_error
