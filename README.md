@@ -103,3 +103,9 @@ Untuk deploy aplikasi Go di heroku dapat dilihat di link berikut https://devcent
 
 ## API Spec
 API Spec can be found in docs folder
+
+## Todo
+- Add more test cases
+- ...
+- ...
+- etc
