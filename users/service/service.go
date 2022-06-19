@@ -34,7 +34,7 @@ func Register(ctx *gin.Context) {
 		}
 		password := commons.RandString(6)
 		new_user.SetPasswordHash(password)
-		model.SaveOne(&new_user)
+		model.CreateOneUser(&new_user)
 
 		userSerializer := serializer.UserRegisteredSerializer{
 			Ctx:      ctx,

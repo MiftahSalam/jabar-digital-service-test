@@ -55,10 +55,10 @@ func TestSaveOne(t *testing.T) {
 	asserts := assert.New(t)
 
 	// fmt.Println("user mock", usersMock[0])
-	err := SaveOne(&UsersMock[0])
+	err := CreateOneUser(&UsersMock[0])
 	asserts.NoError(err)
 	// fmt.Println("user mock", usersMock[0])
-	err = SaveOne(&User{Username: UsersMock[0].Username}) //create same user again
+	err = CreateOneUser(&User{Username: UsersMock[0].Username}) //create same user again
 	asserts.Error(err, "Should return error duplicate key")
 }
 
