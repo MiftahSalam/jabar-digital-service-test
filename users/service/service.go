@@ -88,11 +88,11 @@ func Auth(ctx *gin.Context) {
 	}
 
 	token_claim := *claims
-	// fmt.Println("token_claim", token_claim)
+	fmt.Println("exp", time.Unix(int64(token_claim["exp"].(float64)), 0).String())
 
 	auth_response := serializer.AuthDtoResponse{
 		Is_valid: token.Valid,
-		Expired:  time.UnixMilli(int64(token_claim["exp"].(float64))).String(),
+		Expired:  time.Unix(int64(token_claim["exp"].(float64)), 0).String(),
 		Username: token_claim["username"].(string),
 	}
 
