@@ -35,5 +35,5 @@ func main() {
 	v1 := router.Group("/api/v1")
 	userRouter.Users(v1.Group("/auth"))
 
-	router.Run()
+	router.Run();
 }
